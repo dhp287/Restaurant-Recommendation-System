@@ -23,7 +23,7 @@ function chat(){
   // });
   //
   var apigClient = apigClientFactory.newClient({
-    apiKey: 'rm6GCnF8P55SEmEiqYT682hpRJMOX5oAa1TvJcTU'
+    apiKey: ''
   });
 
   var params = {
