@@ -1,4 +1,3 @@
-
 var hist = '';
 
 function getDateTime()
@@ -23,7 +22,7 @@ function chat(){
   // });
   //
   var apigClient = apigClientFactory.newClient({
-    apiKey: ''
+    //apiKey: 'rm6GCnF8P55SEmEiqYT682hpRJMOX5oAa1TvJcTU'
   });
 
   var params = {
@@ -49,13 +48,14 @@ function chat(){
     }
   };
 
+
   apigClient.chatbotPost(params, body)
       .then(function(result){
-        hist = hist + getDateTime() + "  BOT:  " + result.data.body + '\n';
+        hist = hist + getDateTime() + "  BOT:  " + result.data.message + '\n';
         document.getElementById("textarea").value = hist;
         // Add success callback code here.
       }).catch( function(result){
-        console.log(result.data.body);
+        console.log(result.data.message);
         // Add error callback code here.
       });
 

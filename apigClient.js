@@ -14,6 +14,63 @@
  */
 
 var apigClientFactory = {};
+
+// var data = {
+//         UserPoolId : 'us-east-1_iUNvFj1uo', // Your user pool id here
+//         ClientId : '142o33rei8etvg1hkji62rndi0' // Your client id here
+//     };
+//     var userPool = new AmazonCognitoIdentity.CognitoUserPool(data);
+// var cognitoUser = userPool.getCurrentUser();
+//
+// if (cognitoUser != null) {
+//     cognitoUser.getSession(function(err, result) {
+//         if (result) {
+//             console.log('You are now logged in.');
+//
+//             // Add the User's Id Token to the Cognito credentials login map.
+//             AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+//                 IdentityPoolId: 'us-east-1:84ca9203-7982-41f3-ba12-b70a8020cd03',
+//                 Logins: {
+//                     'cognito-idp.us-east-1.amazonaws.com/us-east-1_iUNvFj1uo': result.getIdToken().getJwtToken()
+//                 }
+//             });
+//         }
+//     });
+// }
+// //call refresh method in order to authenticate user and get new temp credentials
+// AWS.config.credentials.refresh((error) => {
+//     if (error) {
+//         console.error(error);
+//     } else {
+//         console.log('Successfully logged!');
+//     }
+//     });
+
+
+var url = window.location.href;
+url = url.split('#')[1];
+var arr = url.split('&');
+var token = arr[0].split('=')[1];
+
+
+AWS.config.region = 'us-east-1';
+AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+    IdentityPoolId : 'us-east-1:84ca9203-7982-41f3-ba12-b70a8020cd03', // your identity pool id here
+    Logins : {
+        // Change the key below according to the specific region your user pool is in.
+        'cognito-idp.us-east-1.amazonaws.com/us-east-1_iUNvFj1uo' : token
+    }
+});
+
+AWS.config.credentials.refresh((error) => {
+    if (error) {
+        console.error(error);
+    } else {
+        console.log('Successfully logged!');
+    }
+});
+
+
 apigClientFactory.newClient = function (config) {
     var apigClient = { };
     if(config === undefined) {
@@ -28,16 +85,16 @@ apigClientFactory.newClient = function (config) {
         };
     }
     if(config.accessKey === undefined) {
-        config.accessKey = '';
+        config.accessKey = AWS.config.credentials.accessKeyId;
     }
     if(config.secretKey === undefined) {
-        config.secretKey = '';
+        config.secretKey = AWS.config.credentials.secretAccessKey;
     }
     if(config.apiKey === undefined) {
         config.apiKey = '';
     }
     if(config.sessionToken === undefined) {
-        config.sessionToken = '';
+        config.sessionToken = AWS.config.credentials.sessionToken;
     }
     if(config.region === undefined) {
         config.region = 'us-east-1';
@@ -51,9 +108,9 @@ apigClientFactory.newClient = function (config) {
         config.defaultAcceptType = 'application/json';
     }
 
-    
+
     // extract endpoint and path from url
-    var invokeUrl = 'https://rawdygjor7.execute-api.us-east-1.amazonaws.com/beta';
+    var invokeUrl = 'https://znirkpc8x5.execute-api.us-east-1.amazonaws.com/beta';
     var endpoint = /(^https?:\/\/[^\/]+)/g.exec(invokeUrl)[1];
     var pathComponent = invokeUrl.substring(endpoint.length);
 
@@ -80,14 +137,14 @@ apigClientFactory.newClient = function (config) {
     };
 
     var apiGatewayClient = apiGateway.core.apiGatewayClientFactory.newClient(simpleHttpClientConfig, sigV4ClientConfig);
-    
-    
-    
+
+
+
     apigClient.chatbotPost = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
-        
+
         apiGateway.core.utils.assertParametersDefined(params, ['body'], ['body']);
-        
+
         var chatbotPostRequest = {
             verb: 'post'.toUpperCase(),
             path: pathComponent + uritemplate('/chatbot').expand(apiGateway.core.utils.parseParametersToObject(params, [])),
@@ -95,17 +152,17 @@ apigClientFactory.newClient = function (config) {
             queryParams: apiGateway.core.utils.parseParametersToObject(params, []),
             body: body
         };
-        
-        
+
+
         return apiGatewayClient.makeRequest(chatbotPostRequest, authType, additionalParams, config.apiKey);
     };
-    
-    
+
+
     apigClient.chatbotOptions = function (params, body, additionalParams) {
         if(additionalParams === undefined) { additionalParams = {}; }
-        
+
         apiGateway.core.utils.assertParametersDefined(params, [], ['body']);
-        
+
         var chatbotOptionsRequest = {
             verb: 'options'.toUpperCase(),
             path: pathComponent + uritemplate('/chatbot').expand(apiGateway.core.utils.parseParametersToObject(params, [])),
@@ -113,11 +170,11 @@ apigClientFactory.newClient = function (config) {
             queryParams: apiGateway.core.utils.parseParametersToObject(params, []),
             body: body
         };
-        
-        
+
+
         return apiGatewayClient.makeRequest(chatbotOptionsRequest, authType, additionalParams, config.apiKey);
     };
-    
+
 
     return apigClient;
 };
